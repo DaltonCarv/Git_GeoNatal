@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "leaflet": "^1.9.4",
+    "leaflet-arearuler": "0.0.1"
+  }
+}

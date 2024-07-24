@@ -1,0 +1,2409 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/x-icon" href="https://www.natal.rn.gov.br/themes/Prefeitura/assets/images/favicon.ico">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+  <link rel="stylesheet" href="node_modules\leaflet\dist\leaflet.css" /> <!-- Leaflet -->
+  <link rel="stylesheet" type="text/css" href="stylesheets/Leaflet.PolylineMeasure.css">
+  <link rel="stylesheet" type="text/css" href="stylesheets/minimap/Control.MiniMap.css" /> <!-- Minimapa -->
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
+    integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+  <!-- Ícones Awesome -->
+  <script src="https://kit.fontawesome.com/c2eaecad4c.js"></script> <!-- Ícones Awesome -->
+  <script src="node_modules\leaflet\dist\leaflet.js"></script> <!-- Biblioteca Leaflet -->
+  <script type="text/javascript" src="js/minimap/Control.MiniMap.js"></script> <!-- Biblioteca do minimapa -->
+  <script type="text/javascript" src="js/imprimir/leaflet.browser.print.min.js"></script>
+  <!-- Biblioteca de impressão -->
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script> <!-- Biblioteca jQuerry -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" charset="UTF-8"></script>
+  <!-- Biblioteca jQuerry -->
+  <script type="text/javascript" src="js/Leaflet.PolylineMeasure.js"></script>
+
+
+  <!-- Dependency to Leaflet Draw -->
+  <link rel="stylesheet" type="text/css" href="node_modules/leaflet-draw/dist/leaflet.draw.css">
+  <script src="node_modules/leaflet-draw/dist/leaflet.draw.js"></script>
+
+  <!-- Leaflet QgsMeasure -->
+  <script src="node_modules/leaflet-arearuler/dist/leaflet-arearuler.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="node_modules/leaflet-arearuler/dist/leaflet-arearuler.css">
+
+
+  <title>GeoNatal - SEMURB</title>
+  <style>
+    * {
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 16px;
+      color: #ffffff;
+    }
+
+    .leaflet-control span {
+      color: #000000;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    #menutop {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      background-image: linear-gradient(to bottom, #0062ff, #6fa6ff65);
+      background-color: rgb(255, 255, 255);
+      color: white;
+      height: 7.5%;
+      width: 100%;
+      margin: 0 auto;
+      border-bottom: 3px solid goldenrod;
+    }
+
+    #content {
+      display: flex;
+      flex: 1;
+    }
+
+    #mapa {
+      flex-grow: 1;
+      width: 60%;
+    }
+
+    #map {
+      width: 100%;
+      height: 100%;
+    }
+
+    button.cont-but,
+    button.cont-but-legenda {
+      background: linear-gradient(to left, #3f83f1 50%, #6fa6ff 50%);
+      background-size: 200% 100%;
+      background-position: right bottom;
+      border: none;
+      padding: 5px 15px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-family: Arial, sans-serif;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: background-position 0.3s ease, transform 0.3s ease;
+      border-radius: 20px;
+      border: 2px solid #3f83f1;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.144);
+      color: rgb(255, 255, 255);
+      text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+      font-size: 20px;
+    }
+
+    button.cont-but:hover,
+    button.cont-but-legenda:hover {
+      background-position: left bottom;
+      box-shadow: 0 12px 16px 0 rgba(0, 0, 0, 0.24), 0 17px 50px 0 rgba(0, 0, 0, 0.19);
+    }
+
+    .logo {
+      width: 50px;
+      height: auto;
+    }
+
+    .side-bar {
+      background-color: rgba(1, 105, 224, 0.705);
+      backdrop-filter: blur(15px);
+      width: 30%;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: -100%;
+      overflow-y: auto;
+      transition: 0.6s ease;
+      transition-property: left;
+      z-index: 99999;
+    }
+
+    .side-bar.active {
+      left: 0;
+      z-index: 99999;
+    }
+
+    .side-bar .menu {
+      width: 100%;
+      margin-top: 80px;
+    }
+
+    .side-bar .menu .item {
+      position: relative;
+      cursor: pointer;
+    }
+
+    .side-bar .menu .item a {
+      color: #ffffff;
+      text-decoration: none;
+      display: block;
+      padding: 5px 15px;
+      line-height: 30px;
+    }
+
+    .side-bar .menu .item a:hover {
+      background: #02cad1;
+      transition: 0.3s ease;
+
+    }
+
+    .side-bar .menu .item i {
+      margin-right: 15px;
+    }
+
+    .side-bar .menu .item a .dropdown {
+      position: absolute;
+      right: 0;
+      margin: 8px;
+      transition: 0.3s ease;
+      color: #ffffff;
+    }
+
+    .side-bar .menu .item .sub-menu {
+      background: rgba(255, 255, 255, 0.1);
+      display: none;
+    }
+
+    .side-bar .menu .item .sub-menu a {
+      padding-left: 50px;
+    }
+
+    .sub-margin {
+      padding-left: 20px;
+    }
+
+    .rotate {
+      transform: rotate(90deg);
+    }
+
+    .close-btn {
+      position: absolute;
+      color: #ffffff;
+      font-size: 20px;
+      right: 0;
+      margin: 25px;
+      cursor: pointer;
+    }
+
+    .menu-btn {
+      position: absolute;
+      color: #000000;
+      font-size: 20px;
+      margin-top: 25px;
+      cursor: pointer;
+      z-index: 999999;
+    }
+
+    label,
+    .opc {
+      cursor: pointer;
+      padding: 10px;
+    }
+
+    label {
+      display: block;
+    }
+
+    /* O sidebar menu */
+    .sidebar {
+      height: 100%;
+      width: 0;
+      position: fixed;
+      z-index: 1003;
+      top: 0;
+      right: 0;
+      background-color: rgba(1, 105, 224, 0.705);
+      backdrop-filter: blur(15px);
+      overflow-x: hidden;
+      padding-top: 80px;
+      transition: 0.5s;
+    }
+
+    .sidebar .closebtn {
+      position: absolute;
+      top: 5px;
+      left: 30px;
+      font-size: 36px;
+      margin-right: 50px;
+    }
+
+    .sidebar .tabela {
+      width: 100%;
+      margin: auto;
+      border-collapse: collapse;
+    }
+
+    .sidebar .tabela th,
+    .sidebar .tabela td {
+      padding: 8px;
+      text-align: center;
+    }
+
+    .sidebar .tabela th {
+      background-color: #0043d4;
+      color: white;
+    }
+
+    .sidebar .tabela tr:nth-child(even) {
+      background-color: #0099ff;
+    }
+
+    .sidebar .tabela tr:nth-child(odd) {
+      background-color: #004f99
+    }
+
+    .sidebar .tabela a {
+      color: inherit;
+    }
+
+    /* Estilo para o popup */
+    .leaflet-popup-content {
+      max-width: 500px;
+      max-height: 300px;
+      overflow: auto;
+      /* Adicionar rolagem se o conteúdo for maior que as dimensões definidas */
+      background-color: #ffffff;
+    }
+
+    .tabela-popup {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .tabela-popup th,
+    .tabela-popup td {
+      border-top: 1px solid #000000;
+      border-bottom: 1px solid #000000;
+      border-left: 1px solid rgba(0, 0, 0, 0);
+      border-right: 1px solid rgba(0, 0, 0, 0);
+      padding: 5px;
+      width: 100%;
+      text-align: center;
+      color: rgb(255, 255, 255);
+    }
+
+    .tabela-popup tr:nth-child(even) {
+      background-color: #004f99;
+    }
+
+    .tabela-popup tr:nth-child(odd) {
+      background-color: #0099ff;
+    }
+
+    .creditos {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 22%;
+      background-color: hsla(0, 0%, 100%, 0.507);
+      color: rgb(0, 0, 0);
+      padding: 10px;
+      box-sizing: border-box;
+      z-index: 1002;
+      font-size: 11px;
+      text-align: right;
+    }
+
+    .tabela-fixa th {
+      position: sticky;
+      top: -80px;
+      z-index: 2;
+    }
+
+    .tabela-scroll {
+      overflow: auto;
+    }
+
+    .search-container {
+      position: absolute;
+      top: 84px;
+      left: 55px;
+      z-index: 1000;
+    }
+
+    .search-input {
+      width: 200px;
+      padding: 5px;
+      border-radius: 5px;
+      border: 2px solid #ccc;
+      margin-right: 5px;
+      color: black;
+      /* Definindo a cor do texto */
+    }
+
+    .search-button {
+      padding: 5px 10px;
+      border: none;
+      border-radius: 50px;
+      background-color: #007bff;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    .close-button {
+      padding: 5px 10px;
+      border: none;
+      border-radius: 50px;
+      background-color: #dc3545;
+      color: #fff;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Div do 1º menu (Menu do topo) -->
+  <div id="menutop">
+    <button class="cont-but"> <!-- Botão que chama o sidebar de camadas -->
+      <i class="fa fa-bars" aria-hidden="true"></i>
+    </button>
+    <div class="logo-container"> <!-- Local onde virá a logo -->
+      <a href=""><img src="img/logo/LOGO_contraste.png" width="100%" height="60"></a>
+    </div>
+    <button onclick="openNav()" id="btndownload" class="cont-but-legenda"><i class="fa fa-download"
+        aria-hidden="true"></i></button> <!-- Botão que irá chamar o sidebar de download -->
+    </button>
+  </div>
+  <!-- Fim da div do 1º menu (Menu do topo)-->
+
+  <!-- Início do conteúdo principal do mapa -->
+  <div id="content">
+    <div class="search-container">
+      <input type="text" id="searchInput" class="search-input" placeholder="Buscar quadra">
+      <button onclick="search()" class="search-button">&#128269;</button>
+      <button onclick="closeSearch()" class="close-button">X</button>
+    </div>
+
+    <div class="side-bar"> <!-- Menu lateral das camadas -->
+      <div class="close-btn"> <!-- Botão que fecha o menu lateral de camadas-->
+        <i class="fas fa-times"></i>
+      </div> <!-- Fim botão que fecha o menu lateral de camadas-->
+      <div class="menu">
+        <div class="item">
+          <a class="sub-btn">Limites físicos<i class="fas fa-angle-right dropdown"></i></a>
+          <div class="sub-menu">
+            <label><input type="checkbox" id="lf_per" class="opc">Perímetro de Natal</label>
+            <label><input type="checkbox" id="lf_lim_bai" class="opc">Limite de Bairros</label>
+            <label><input type="checkbox" id="lf_zadm" class="opc">Zonas Administrativas</label>
+          </div>
+        </div>
+
+        <div class="item">
+          <a class="sub-btn">Localização<i class="fas fa-angle-right dropdown"></i></a>
+          <div class="sub-menu">
+            <label><input type="checkbox" id="loc_logra" class="opc">Logradouros</label>
+          </div>
+        </div>
+
+        <div class="item">
+          <a class="sub-btn">Setores Censitários (IBGE 2010)<i class="fas fa-angle-right dropdown"></i></a>
+          <div class="sub-menu">
+            <label><input type="checkbox" id="sc_censo" class="opc">Setores Censitários</label>
+          </div>
+        </div>
+
+        <div class="item">
+          <a class="sub-btn">Curva de nível<i class="fas fa-angle-right dropdown"></i></a>
+          <div class="sub-menu">
+            <label><input type="checkbox" id="curvas_zn" class="opc">Zona Norte</label>
+            <label><input type="checkbox" id="curvas_zs" class="opc">Zona Sul</label>
+            <label><input type="checkbox" id="curvas_zl" class="opc">Zona Leste</label>
+            <label><input type="checkbox" id="curvas_zo" class="opc">Zona Oeste</label>
+            <label><input type="checkbox" id="curvas_sz" class="opc">Fora dos limites das zonas
+              administrativas</label>
+          </div>
+        </div>
+
+        <div class="item">
+          <a class="sub-btn">Cadastro Territorial<i class="fas fa-angle-right dropdown"></i></a>
+          <div class="sub-menu">
+            <a class="sub-btn">Quadras<i class="fas fa-angle-right dropdown"></i></a>
+            <div class="sub-menu">
+              <label><input type="checkbox" id="qua_zn" class="opc">Zona Norte</label>
+              <label><input type="checkbox" id="qua_zs" class="opc">Zona Sul</label>
+              <label><input type="checkbox" id="qua_zl" class="opc">Zona Leste</label>
+              <label><input type="checkbox" id="qua_zo" class="opc">Zona Oeste</label>
+            </div>
+            <a class="sub-btn">Parcela (Lotes)<i class="fas fa-angle-right dropdown"></i></a>
+            <div class="sub-menu">
+              <label><input type="checkbox" id="lot_zn" class="opc">Zona Norte</label>
+              <label><input type="checkbox" id="lot_zs" class="opc">Zona Sul</label>
+              <label><input type="checkbox" id="lot_zl" class="opc">Zona Leste</label>
+              <label><input type="checkbox" id="lot_zo" class="opc">Zona Oeste</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="item">
+          <a class="sub-btn">Fundiário<i class="fas fa-angle-right dropdown"></i></a>
+          <div class="sub-menu">
+            <label><input type="checkbox" id="pu_conj" class="opc">Conjuntos</label>
+            <label><input type="checkbox" id="pu_loteamento" class="opc">Loteamento</label>
+            <label><input type="checkbox" id="pu_circimo" class="opc">Circunscrição imobiliária</label>
+            <label><input type="checkbox" id="pu_regfund" class="opc">Regularização fundiária</label>
+            <label><input type="checkbox" id="rj_afu" class="opc">Área foreira da União</label>
+            <label><input type="checkbox" id="rj_afm" class="opc">Área foreira Municipal</label>
+            <label><input type="checkbox" id="rj_ind" class="opc">Área indeterminada</label>
+            <label><input type="checkbox" id="rj_lpm" class="opc">Linha de Preamar</label>
+            <label><input type="checkbox" id="rj_area_prop" class="opc">Área Própria</label>
+          </div>
+        </div>
+
+        <div class="item">
+          <a class="sub-btn">Equipamentos comunitários<i class="fas fa-angle-right dropdown"></i></a>
+          <div class="sub-menu">
+            <label><input type="checkbox" id="ec_unidsau" class="opc">Unidades de saúde</label>
+            <label><input type="checkbox" id="ec_eqesp" class="opc">Equipamentos desportivos</label>
+            <label><input type="checkbox" id="ec_segpub" class="opc">Segurança pública</label>
+            <a class="sub-btn">Escolas <i class="fas fa-angle-right dropdown"></i></a>
+            <div class="sub-menu">
+              <label><input type="checkbox" id="ec_esc_pub" class="opc">Escolas públicas</label>
+              <label><input type="checkbox" id="ec_esc_priv" class="opc">Escolas particulares</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="item">
+          <a class="sub-btn">Infraestrutura<i class="fas fa-angle-right dropdown"></i></a>
+          <div class="sub-menu">
+            <a href="#" class="sub-item sub-btn">Mobilidade<i class="fas fa-angle-right dropdown"></i></a>
+            <div class="sub-menu sub-item">
+              <a class="sub-btn">Linha férrea<i class="fas fa-angle-right dropdown"></i></a>
+              <div class="sub-menu">
+                <label><input type="checkbox" id="mob_fer" class="opc">Linha férrea</label>
+                <label><input type="checkbox" id="mob_fer_cm" class="opc">Linha férrea: Natal - Ceará-Mirim</label>
+                <label><input type="checkbox" id="mob_fer_par" class="opc">Linha férrea: Natal - Parnamirim</label>
+              </div>
+              <label><input type="checkbox" id="infra_po" class="opc">Parada de ônibus</label>
+              <label><input type="checkbox" id="infra_est_fer" class="opc">Estações Ferroviárias</label>
+            </div>
+            <a href="#" class="sub-item sub-btn">Energia<i class="fas fa-angle-right dropdown"></i></a>
+            <div class="sub-menu sub-item">
+              <label><input type="checkbox" id="ener_subest" class="opc">Substações de energia</label>
+              <a class="sub-btn">Postes de iluminação<i class="fas fa-angle-right dropdown"></i></a>
+              <div class="sub-menu">
+                <label><input type="checkbox" id="postes_zn" class="opc">Zona Norte</label>
+                <label><input type="checkbox" id="postes_zs" class="opc">Zona Sul</label>
+                <label><input type="checkbox" id="postes_zl" class="opc">Zona Leste</label>
+                <label><input type="checkbox" id="postes_zo" class="opc">Zona Oeste</label>
+                <label><input type="checkbox" id="postes_sz" class="opc">Fora dos limites das zonas
+                  administrativas</label>
+              </div>
+            </div>
+            <a href="#" class="sub-item sub-btn">Água<i class="fas fa-angle-right dropdown"></i></a>
+            <div class="sub-menu sub-item">
+              <label><input type="checkbox" id="a_poco" class="opc">Poços</label>
+              <label><input type="checkbox" id="a_eea" class="opc">Estações Elevatórias de Água (EEA)</label>
+              <label><input type="checkbox" id="a_eta" class="opc">Estações de Tratamento de Água (ETA)</label>
+              <label><input type="checkbox" id="a_reserv" class="opc">Reservatórios</label>
+            </div>
+            <a href="#" class="sub-item sub-btn">Esgoto<i class="fas fa-angle-right dropdown"></i></a>
+            <div class="sub-menu sub-item">
+              <label><input type="checkbox" id="esg_eee" class="opc">Estação Elevatória de Esgoto</label>
+              <label><input type="checkbox" id="esg_ete" class="opc">Estação de Tratamento de Esgoto</label>
+            </div>
+            <a href="#" class="sub-item sub-btn">Drenagem<i class="fas fa-angle-right dropdown"></i></a>
+            <div class="sub-menu sub-item">
+              <label><input type="checkbox" id="dren_bd" class="opc">Bacias de Drenagem</label>
+              <label><input type="checkbox" id="dren_ld" class="opc">lagoas de Drenagem</label>
+            </div>
+            <a href="#" class="sub-item sub-btn">Gás<i class="fas fa-angle-right dropdown"></i></a>
+            <div class="sub-menu sub-item">
+              <label><input type="checkbox" id="gas_tub" class="opc">Tubulação de gás</label>
+            </div>
+            <a href="#" class="sub-item sub-btn">Comunicação<i class="fas fa-angle-right dropdown"></i></a>
+            <div class="sub-menu sub-item">
+              <label><input type="checkbox" id="com_emb" class="opc">Gabarito Embratel</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="item">
+          <a class="sub-btn">Serviços<i class="fas fa-angle-right dropdown"></i></a>
+          <div class="sub-menu">
+            <label><input type="checkbox" id="serv_mercpub" class="opc">Mercado público</label>
+            <label><input type="checkbox" id="serv_cem" class="opc">Cemitério</label>
+            <label><input type="checkbox" id="serv_fei" class="opc">Feiras</label>
+          </div>
+        </div>
+
+        <div class="item">
+          <a class="sub-btn">Mobiliário urbano<i class="fas fa-angle-right dropdown"></i></a>
+          <div class="sub-menu">
+            <label><input type="checkbox" id="mob_plac" class="opc">Placas de endereçamento</label>
+            <label><input type="checkbox" id="mob_mupis" class="opc">Mupis</label>
+            <label><input type="checkbox" id="mob_relogios" class="opc">Relógios</label>
+          </div>
+        </div>
+
+        <div class="item">
+          <a class="sub-btn">Áreas de influência de voo<i class="fas fa-angle-right dropdown"></i></a>
+          <div class="sub-menu">
+            <label><input type="checkbox" id="area_aero" class="opc">Aeroporto</label>
+          </div>
+        </div>
+
+        <div class="item">
+          <a class="sub-btn">Zoneamento em vigor<i class="fas fa-angle-right dropdown"></i></a>
+          <div class="sub-menu">
+            <label><input type="checkbox" id="pdn22_macro" class="opc">Macrozoneamento</label>
+            <label><input type="checkbox" id="pdn22_CAbacia" class="opc">CA da quadra por bacia</label>
+            <label><input type="checkbox" id="pdn22_bai_max" class="opc">CA máximo por bairro</label>
+            <label><input type="checkbox" id="pdn22_cata" class="opc">AEIS - Categoria A</label>
+            <label><input type="checkbox" id="pdn22_catb" class="opc">AEIS - Categoria B</label>
+            <label><input type="checkbox" id="pdn22_catc" class="opc">AEIS - Categoria C</label>
+            <label><input type="checkbox" id="pdn22_catd" class="opc">AEIS - Categoria D</label>
+            <label><input type="checkbox" id="pdn22_cat_conc" class="opc">AEIS - Concentração de vilas</label>
+            <label><input type="checkbox" id="pdn22_mis" class="opc">Mancha de Interesse Social (MIS)</label>
+            <label><input type="checkbox" id="pdn22_aou" class="opc">Área de Operação Urbana</label>
+            <label><input type="checkbox" id="pdn22_aepc" class="opc">Área Especial de Preservação Cultural
+              (AEPC)</label>
+            <label><input type="checkbox" id="pdn22_aeitp" class="opc">Área Especial de Interesse Turístico e
+              Paisagístico (AEITP)</label>
+            <label><input type="checkbox" id="pdn22_mun" class="opc">Patrimônio municipal</label>
+            <label><input type="checkbox" id="pdn22_est_pol" class="opc">Patrimônio estadual (polígonos)</label>
+            <label><input type="checkbox" id="pdn22_est_pont" class="opc">Patrimônio estadual (pontos)</label>
+            <label><input type="checkbox" id="pdn22_fed_est_fer_pol" class="opc">Patrimônio federal, estadual e
+              ferroviário (polígono)</label>
+            <label><input type="checkbox" id="pdn22_fed_est_fer" class="opc">Patrimônio federal, estadual e ferroviário
+              (pontos)</label>
+            <label><input type="checkbox" id="pdn22_fed_mun_fer_pol" class="opc">Patrimônio federal, municipal e
+              ferroviário (polígono)</label>
+            <label><input type="checkbox" id="pdn22_fed_mun_fer" class="opc">Patrimônio federal, municipal e ferroviário
+              (pontos)</label>
+            <label><input type="checkbox" id="pdn22_riscnat_agua" class="opc">Contaminação de água</label>
+            <label><input type="checkbox" id="pdn22_risctecn_aguasol_pol" class="opc">Contaminação de água e solo
+              (Polígono) </label>
+            <label><input type="checkbox" id="pdn22_risctecn_aguasol" class="opc">Contaminação de água e solo
+              (Ponto)</label>
+            <label><input type="checkbox" id="pdn22_aepr" class="opc">Área Especial de Risco de Erosão (AEPR)</label>
+            <label><input type="checkbox" id="pdn22_cost_er" class="opc">Erosão Costeira</label>
+            <label><input type="checkbox" id="pdn22_cost_pp" class="opc">Praias Prioritárias</label>
+            <label><input type="checkbox" id="pdn22_mod_rod" class="opc">Rodovias</label>
+            <label><input type="checkbox" id="pdn22_ris_tec_at" class="opc">Redes de alta tensão</label>
+            <label><input type="checkbox" id="pdn22_limmar" class="opc">Limite do mar</label>
+            <label><input type="checkbox" id="pdn22_orlafluv" class="opc">Orla fluvial</label>
+            <label><input type="checkbox" id="pdn22_marit" class="opc">Orla marítima</label>
+            <label><input type="checkbox" id="pdn22_pesca" class="opc">Área de pesca</label>
+            <label><input type="checkbox" id="pdn22_ameac" class="opc">Área especial de ocorrência de espécies
+              ameaçadas</label>
+            <label><input type="checkbox" id="pdn22_ee_ee" class="opc">Eixos Estruturantes</label>
+            <label><input type="checkbox" id="pdn22_aeru" class="opc">Área Especial de Requalificação Urbana
+              (AERU)</label>
+            <label><input type="checkbox" id="pdn22_aem" class="opc">Área Especial Militar (AEM)</label>
+            <label><input type="checkbox" id="pdn22_aep" class="opc">Área Especial Portuária (AEP)</label>
+            <label><input type="checkbox" id="zpa_1" class="opc">Zona de Proteção Ambiental 01</label>
+            <label><input type="checkbox" id="zpa_2" class="opc">Zona de Proteção Ambiental 02</label>
+            <label><input type="checkbox" id="zpa_3" class="opc">Zona de Proteção Ambiental 03</label>
+            <label><input type="checkbox" id="zpa_4" class="opc">Zona de Proteção Ambiental 04</label>
+            <label><input type="checkbox" id="zpa_5" class="opc">Zona de Proteção Ambiental 05</label>
+            <label><input type="checkbox" id="zpa_6" class="opc">Zona de Proteção Ambiental 06</label>
+            <label><input type="checkbox" id="zpa_7" class="opc">Zona de Proteção Ambiental 07</label>
+            <label><input type="checkbox" id="zpa_8" class="opc">Zona de Proteção Ambiental 08</label>
+            <label><input type="checkbox" id="zpa_9" class="opc">Zona de Proteção Ambiental 09</label>
+            <label><input type="checkbox" id="zpa_10" class="opc">Zona de Proteção Ambiental 10</label>
+            <label><input type="checkbox" id="da_rio" class="opc">Rios e Margens Fluviais</label>
+            <label><input type="checkbox" id="da_lagoas" class="opc">Lagoas e áreas no entorno</label>
+            <label><input type="checkbox" id="da_nasc" class="opc">Nascentes e olhos d'água </label>
+            <label><input type="checkbox" id="da_nasc_ae" class="opc">Áreas no entorno</label>
+            <label><input type="checkbox" id="da_bre" class="opc">Brejos e áreas no entorno</label>
+            <label><input type="checkbox" id="da_enc" class="opc">Encostas</label>
+            <label><input type="checkbox" id="da_mang" class="opc">Manguezais</label>
+            <label><input type="checkbox" id="da_fal" class="opc">Falésias e Bordas de Tabuleiro</label>
+            <label><input type="checkbox" id="da_dun" class="opc">Dunas</label>
+            <label><input type="checkbox" id="da_rec" class="opc">Recifes</label>
+            <label><input type="checkbox" id="da_veg_dun" class="opc">Vegetação dunar</label>
+            <label><input type="checkbox" id="da_espame" class="opc">Áreas com espéciesprotegidas</label>
+          </div>
+        </div>
+
+        <div class="item">
+          <a class="sub-btn">Instrumentos de política urbana<i class="fas fa-angle-right dropdown"></i></a>
+          <div class="sub-menu">
+            <a href="#" class="sub-item sub-btn">Transferência de Potencial Construtivo (TPC)<i
+                class="fas fa-angle-right dropdown"></i></a>
+            <div class="sub-menu sub-item">
+              <label><input type="checkbox" id="tpc_ced" class="opc">Cedente</label>
+              <label><input type="checkbox" id="tpc_rec" class="opc">Receptor</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="item">
+          <a class="sub-btn">Dados Urbanísticos<i class="fas fa-angle-right dropdown"></i></a>
+          <div class="sub-menu">
+            <a class="sub-item sub-btn">Licenciamento<i class="fas fa-angle-right dropdown"></i></a>
+            <div class="sub-menu">
+              <a href="#" class="sub-item sub-btn">Alvará<i class="fas fa-angle-right dropdown"></i></a>
+              <div class="sub-menu sub-margin">
+                <a href="#" class="sub-item sub-btn">2017<i class="fas fa-angle-right dropdown"></i></a>
+                <div class="sub-menu ">
+                  <label><input type="checkbox" id="amp17" class="opc">Ampliação e/ou Reforma</label>
+                  <label><input type="checkbox" id="dem17" class="opc">Demolição</label>
+                  <label><input type="checkbox" id="reg17" class="opc">Regularização</label>
+                  <label><input type="checkbox" id="leg17" class="opc">Legalização</label>
+                  <label><input type="checkbox" id="const17" class="opc">Construção</label>
+                  <label><input type="checkbox" id="out17" class="opc">Outros</label>
+                </div>
+                <a href="#" class="sub-item sub-btn">2018<i class="fas fa-angle-right dropdown"></i></a>
+                <div class="sub-menu">
+                  <label><input type="checkbox" id="amp18" class="opc">Ampliação e/ou Reforma</label>
+                  <label><input type="checkbox" id="dem18" class="opc">Demolição</label>
+                  <label><input type="checkbox" id="reg18" class="opc">Regularização</label>
+                  <label><input type="checkbox" id="leg18" class="opc">Legalização</label>
+                  <label><input type="checkbox" id="const18" class="opc">Construção</label>
+                  <label><input type="checkbox" id="out18" class="opc">Outros</label>
+                </div>
+                <a href="#" class="sub-item sub-btn">2019<i class="fas fa-angle-right dropdown"></i></a>
+                <div class="sub-menu">
+                  <label><input type="checkbox" id="amp19" class="opc">Ampliação e/ou Reforma</label>
+                  <label><input type="checkbox" id="dem19" class="opc">Demolição</label>
+                  <label><input type="checkbox" id="reg19" class="opc">Regularização</label>
+                  <label><input type="checkbox" id="leg19" class="opc">Legalização</label>
+                  <label><input type="checkbox" id="const19" class="opc">Construção</label>
+                  <label><input type="checkbox" id="out19" class="opc">Outros</label>
+                </div>
+                <a href="#" class="sub-item sub-btn">2020<i class="fas fa-angle-right dropdown"></i></a>
+                <div class="sub-menu">
+                  <label><input type="checkbox" id="amp20" class="opc">Ampliação e/ou Reforma</label>
+                  <label><input type="checkbox" id="dem20" class="opc">Demolição</label>
+                  <label><input type="checkbox" id="reg20" class="opc">Regularização</label>
+                  <label><input type="checkbox" id="leg20" class="opc">Legalização</label>
+                  <label><input type="checkbox" id="const20" class="opc">Construção</label>
+                  <label><input type="checkbox" id="out20" class="opc">Outros</label>
+                </div>
+                <a href="#" class="sub-item sub-btn">2021<i class="fas fa-angle-right dropdown"></i></a>
+                <div class="sub-menu">
+                  <label><input type="checkbox" id="amp21" class="opc">Ampliação e/ou Reforma</label>
+                  <label><input type="checkbox" id="dem21" class="opc">Demolição</label>
+                  <label><input type="checkbox" id="reg21" class="opc">Regularização</label>
+                  <label><input type="checkbox" id="leg21" class="opc">Legalização</label>
+                  <label><input type="checkbox" id="const21" class="opc">Construção</label>
+                  <label><input type="checkbox" id="out21" class="opc">Outros</label>
+                </div>
+                <a href="#" class="sub-item sub-btn">2022<i class="fas fa-angle-right dropdown"></i></a>
+                <!-- Link do ano para abrir o sub-menu com os tipos -->
+                <div class="sub-menu"><!-- Checkboxs que irão mostrar as feições -->
+                  <label><input type="checkbox" id="amp22" class="opc">Ampliação e/ou Reforma</label>
+                  <label><input type="checkbox" id="dem22" class="opc">Demolição</label>
+                  <label><input type="checkbox" id="reg22" class="opc">Regularização</label>
+                  <label><input type="checkbox" id="leg22" class="opc">Legalização</label>
+                  <label><input type="checkbox" id="const22" class="opc">Construção</label>
+                  <label><input type="checkbox" id="out22" class="opc">Outros</label>
+                </div><!-- Checkboxs que irão mostrar as feições -->
+                <a href="#" class="sub-item sub-btn">2023<i class="fas fa-angle-right dropdown"></i></a>
+                <!-- Link do ano para abrir o sub-menu com os tipos -->
+                <div class="sub-menu"><!-- Checkboxs que irão mostrar as feições -->
+                  <label><input type="checkbox" id="amp23" class="opc">Ampliação e/ou Reforma</label>
+                  <label><input type="checkbox" id="dem23" class="opc">Demolição</label>
+                  <label><input type="checkbox" id="reg23" class="opc">Regularização</label>
+                  <label><input type="checkbox" id="leg23" class="opc">Legalização</label>
+                  <label><input type="checkbox" id="const23" class="opc">Construção</label>
+                  <label><input type="checkbox" id="out23" class="opc">Outros</label>
+                </div><!-- Checkboxs que irão mostrar as feições -->
+              </div> <!-- Fim do menu de alvará com todas opções -->
+
+              <a href="#" class="sub-item sub-btn">Habite-se<i class="fas fa-angle-right dropdown"></i></a>
+              <!-- Link para abrir menu de habite-se -->
+              <div class="sub-menu sub-margin"> <!-- Menu com os anos dos habite-se -->
+                <a href="#" class="sub-item sub-btn">2017<i class="fas fa-angle-right dropdown"></i></a>
+                <!-- Link do ano para abrir o sub-menu com os tipos -->
+                <div class="sub-menu"> <!-- Checkboxs que irão mostrar as feições -->
+                  <label><input type="checkbox" id="uni17" class="opc">Residencial Unifamiliar</label>
+                  <label><input type="checkbox" id="multi17" class="opc">Residencial Multifamiliar</label>
+                  <label><input type="checkbox" id="nres17" class="opc">Não residencial</label>
+                  <label><input type="checkbox" id="mis17" class="opc">Misto</label>
+                </div><!-- Checkboxs que irão mostrar as feições -->
+                <a href="#" class="sub-item sub-btn">2018<i class="fas fa-angle-right dropdown"></i></a>
+                <!-- Link do ano para abrir o sub-menu com os tipos -->
+                <div class="sub-menu"><!-- Checkboxs que irão mostrar as feições -->
+                  <label><input type="checkbox" id="uni18" class="opc">Residencial Unifamiliar</label>
+                  <label><input type="checkbox" id="multi18" class="opc">Residencial Multifamiliar</label>
+                  <label><input type="checkbox" id="nres18" class="opc">Não residencial</label>
+                  <label><input type="checkbox" id="mis18" class="opc">Misto</label>
+                </div><!-- Checkboxs que irão mostrar as feições -->
+                <a href="#" class="sub-item sub-btn">2019<i class="fas fa-angle-right dropdown"></i></a>
+                <!-- Link do ano para abrir o sub-menu com os tipos -->
+                <div class="sub-menu"><!-- Checkboxs que irão mostrar as feições -->
+                  <label><input type="checkbox" id="uni19" class="opc">Residencial Unifamiliar</label>
+                  <label><input type="checkbox" id="multi19" class="opc">Residencial Multifamiliar</label>
+                  <label><input type="checkbox" id="nres19" class="opc">Não residencial</label>
+                  <label><input type="checkbox" id="mis19" class="opc">Misto</label>
+                </div><!-- Checkboxs que irão mostrar as feições -->
+                <a href="#" class="sub-item sub-btn">2020<i class="fas fa-angle-right dropdown"></i></a>
+                <!-- Link do ano para abrir o sub-menu com os tipos -->
+                <div class="sub-menu"><!-- Checkboxs que irão mostrar as feições -->
+                  <label><input type="checkbox" id="uni20" class="opc">Residencial Unifamiliar</label>
+                  <label><input type="checkbox" id="multi20" class="opc">Residencial Multifamiliar</label>
+                  <label><input type="checkbox" id="nres20" class="opc">Não residencial</label>
+                  <label><input type="checkbox" id="mis20" class="opc">Misto</label>
+                </div><!-- Checkboxs que irão mostrar as feições -->
+                <a href="#" class="sub-item sub-btn">2021<i class="fas fa-angle-right dropdown"></i></a>
+                <!-- Link do ano para abrir o sub-menu com os tipos -->
+                <div class="sub-menu"><!-- Checkboxs que irão mostrar as feições -->
+                  <label><input type="checkbox" id="uni21" class="opc">Residencial Unifamiliar</label>
+                  <label><input type="checkbox" id="multi21" class="opc">Residencial Multifamiliar</label>
+                  <label><input type="checkbox" id="nres21" class="opc">Não residencial</label>
+                  <label><input type="checkbox" id="mis21" class="opc">Misto</label>
+                </div><!-- Checkboxs que irão mostrar as feições -->
+                <a href="#" class="sub-item sub-btn">2022<i class="fas fa-angle-right dropdown"></i></a>
+                <!-- Link do ano para abrir o sub-menu com os tipos -->
+                <div class="sub-menu"><!-- Checkboxs que irão mostrar as feições -->
+                  <label><input type="checkbox" id="uni22" class="opc">Residencial Unifamiliar</label>
+                  <label><input type="checkbox" id="multi22" class="opc">Residencial Multifamiliar</label>
+                  <label><input type="checkbox" id="nres22" class="opc">Não residencial</label>
+                  <label><input type="checkbox" id="mis22" class="opc">Outros</label>
+                </div><!-- Checkboxs que irão mostrar as feições -->
+                <a href="#" class="sub-item sub-btn">2023<i class="fas fa-angle-right dropdown"></i></a>
+                <!-- Link do ano para abrir o sub-menu com os tipos -->
+                <div class="sub-menu"><!-- Checkboxs que irão mostrar as feições -->
+                  <label><input type="checkbox" id="uni23" class="opc">Residencial Unifamiliar</label>
+                  <label><input type="checkbox" id="multi23" class="opc">Residencial Multifamiliar</label>
+                  <label><input type="checkbox" id="nres23" class="opc">Não residencial</label>
+                  <label><input type="checkbox" id="mis23" class="opc">Outros</label>
+                </div><!-- Checkboxs que irão mostrar as feições -->
+              </div> <!-- Fim do menu com os anos dos habite-se -->
+            </div><!-- Fim das opções do menu licenciamento -->
+          </div> <!-- Fim do conteúdo do menu de Licenciamento -->
+        </div>
+      </div> <!-- Fim de todo o conteúdo do menu de camadas -->
+    </div> <!-- Fim Menu lateral das camadas -->
+
+    <div id="mySidebar" class="sidebar"> <!-- Sidebar que irá mostrar os downloads possíveis do site -->
+      <a href="javascript:void(0)" class="closebtn" onclick="closeNav()"><i class="fas fa-times"></i></a>
+      <!-- Botão de fechar -->
+      <table id="tabela-download" class="tabela tabela-fixa tabela-scroll"> <!-- Criação de estrutura de tabela -->
+        <tr> <!-- Linha com informações -->
+          <th>Informação</th> <!-- Cabeçalho - th -->
+          <th>Arquivo</th>
+          <th>Metadado</th>
+          <th>Tipo de Arquivo</th>
+        </tr>
+        <tr><!-- Início do local de colocação das informações para download -->
+          <td>Perímetro de Natal</td>
+          <td><a href="https://drive.google.com/drive/folders/13859T50CJ-N8W8YEl92CvYi1NT8cXAa2?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1iDfu3lZoSgzpcpqGhayOCw6btwvD8JDG/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Limite de Bairros</td>
+          <td><a href="https://drive.google.com/drive/folders/1ROhOxVXPSpcuCGKIzUixwJM1D4W9-ea-?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1-FJ9Hrr6MrmLNIqlY6GyNLodriti_SEC/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Zonas Administrativas</td>
+          <td><a href="https://drive.google.com/drive/folders/1Ogrtqib-hQYDd0yA03DPHYODWyqCTEe6?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1dYAjjRm7foJ_krqmjioeBBzAjXmbm7oY/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Logradouros</td>
+          <td><a href="https://drive.google.com/drive/folders/1WqTMhR5xw-o1UdPomuUFMmO6wlaWJ7l0?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1L2tk9Qfyf9lejkHmAL2bdaHJ0HJQKJmT/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Setores Censitários (IBGE 2010)</td>
+          <td><a href="https://drive.google.com/drive/folders/1fpYAoVemysI9xln5gZdlboIubvGBcMRm?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/16kX79sJB20XSdi7NC1p16VQz8lTTIqjc/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Curvas de Nível - Zona Leste</td>
+          <td><a href="https://drive.google.com/drive/folders/1gTDaQqXLAeDn3z0dT7MVErj5I_xt8sRW?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1dlU0tz_w5SU_nDFQ_nsQZB0nxP7UIR7N/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Curvas de Nível - Zona Norte</td>
+          <td><a href="https://drive.google.com/drive/folders/1gTDaQqXLAeDn3z0dT7MVErj5I_xt8sRW?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/124-1T4XUF7QQxhbb0FuElCK8vX4IC68a/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Curvas de Nível - Zona Oeste</td>
+          <td><a href="https://drive.google.com/drive/folders/1gTDaQqXLAeDn3z0dT7MVErj5I_xt8sRW?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1lAtpOzmIL2eCta6Ryj1Sn0_3jg3oTsGQ/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Curvas de Nível - Zona Sul</td>
+          <td><a href="https://drive.google.com/drive/folders/1gTDaQqXLAeDn3z0dT7MVErj5I_xt8sRW?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1DwoTlrIC7xi41kCNhQDOfVhN7LHy7L9n/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Quadras</td>
+          <td><a href="https://drive.google.com/drive/folders/1Sje_PPTRMT_GJI00HMthFzAtzEHrPcsb?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1WZEBuc7WYQMdCh8LZPfE_iuTSel6D5pO/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Parcelas (Lotes)</td>
+          <td><a href="https://drive.google.com/drive/folders/1_kjcrx05wL5efwhS-CJvctuoHenHDe8I?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1ZAf5flpZCOPSB2JxQ0daCnhO9464GVwm/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Conjuntos</td>
+          <td><a href="https://drive.google.com/drive/folders/1Cnmsg9oaiReZC_joEPKGlAC5Yl_cNWy-?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1oREiCLboeTHJkXhJd12qyECOS-O-RRwy/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Loteamento</td>
+          <td><a href="https://drive.google.com/drive/folders/1HlLM15NbMo_e6dINJyR4aI1Ym4iVuYOV?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1BeKiFwuGDDhDB5wnFgYdZ9nXdYTVIeVc/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Circunscrição imobiliária</td>
+          <td><a href="https://drive.google.com/drive/folders/1dfsDLFLagNxr7dtar3eWcfrMz6who6UX?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/16kgOcJrUkMMLip7J56GMGpxdh2DoaT9d/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Regularização fundiária</td>
+          <td><a href="https://drive.google.com/drive/folders/1G2AZSKmeevdbVEEthZJS2Ta0q8l4FX6N?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1VdWWwsSG4vtHh4M0r3yaocq6RFDx-CHR/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Área foreira da união</td>
+          <td><a href="https://drive.google.com/drive/folders/1N44Lj1m4N3NVzcv2vK5xupiVFNsyQIbd?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1wuW9gy8Pl_x-3KqXhxu5v67DL3wm7FfZ/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Área foreira municipal</td>
+          <td><a href="https://drive.google.com/drive/folders/1LLEA6mBzx2P0OCQmL4yXFNdyVrxEPrpZ?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1T0AAEHf2dn053JJZjccjfuS5QXgrq6AH/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Área indeterminada</td>
+          <td><a href="https://drive.google.com/drive/folders/1loGO7g5oKs3Ag8eUu67zi66q1zdBFTuX?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1jzavYxgAXgJ6vxvDrQTqegXN7ZDv1T55/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Linha de preamar</td>
+          <td><a href="https://drive.google.com/drive/folders/17SIjg6hXGSsKsNHlwB0X1S5x3mplujQG?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1WdHl6TKt556j_Apic9XpSlCt1M5byqGG/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Área de terreno próprio</td>
+          <td><a href="https://drive.google.com/drive/folders/1gdQoHbyHqgKSTB2-LRXzdozerglwYvqM?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1WZiZpj_YQriTzd7hY0w9ycqB5t2E4mzB/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Unidade de saúde</td>
+          <td><a href="https://drive.google.com/drive/folders/1CjK7otAxOmA1Y_bi-sX-gbla0RX_5tTt?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1VYHxlWnrtd4NvSbyoWHa5P9bxil_6YfY/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Equipamentos desportivos</td>
+          <td><a href="https://drive.google.com/drive/folders/1LcqxUYXLmEGSx3URKjEMqBok0PDesQ9g?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1jS9QaS8VJaBP8u_pmgnhC_w41v4QTEn7/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Segurança pública</td>
+          <td><a href="https://drive.google.com/drive/folders/18dy55_JGMdepAXhMSQlZ6R439Qkxi5Aa?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1MnYFbVESEk46XHBIhCUXqOSPdw41aNBo/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Escolas Públicas</td>
+          <td><a href="https://drive.google.com/drive/folders/1cM-oO9sKY-e7enmd2-aGtgzqOgN6I7Wk?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1tAXYLJDFD4-saS11uKgQ-1fc9o_XhmFI/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Escolas Particulares</td>
+          <td><a href="https://drive.google.com/drive/folders/1cM-oO9sKY-e7enmd2-aGtgzqOgN6I7Wk?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1dpB4MpxIm6wB4TCHOeE0OWJWhuimAFiH/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Linhas férreas</td>
+          <td><a href="https://drive.google.com/drive/folders/1tAlIv6dzrjlFAUUtyy-U6kvoljf25i3j?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/163FYTncpnWq-2ENgvDIdinsnXgkVsejH/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Parada de ônibus</td>
+          <td><a href="https://drive.google.com/drive/folders/1xKzq2T7biWbCSdiswMIr70cxPpVIK-FO?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1R9-r4WFIB2hlfmphBoySZpirTRk7tBg0/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Estações Ferroviárias</td>
+          <td><a href="https://drive.google.com/drive/folders/1tAlIv6dzrjlFAUUtyy-U6kvoljf25i3j?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1C_amqxcUGHcpW-rXB-kQWdUgr0LkqTqS/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Substações de energia</td>
+          <td><a href="https://drive.google.com/drive/folders/1Qg_7pQEYnsFt66HMJhytUQbEfDK4tebx?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1R4Ki7tgpsC3vzeU54ufrYMSP_uC1s1Oq/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Postes de iluminação</td>
+          <td><a href="https://drive.google.com/drive/folders/1LZK51Sd5nJTk3Nl1TRAn5X1n7lxx4J_D?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1iQ5TETPNLmO3DaOCIvuKkZcbWbs8tTvx/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Poços</td>
+          <td><a href="https://drive.google.com/drive/folders/1W4cvxU2th_tW4hjhpa8B2V33LKNDvxcD?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1Cx0bDvAhQvz6cVBBS_Hj55X3713KM9Ea/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Estações Elevatórias de Água (EEA)</td>
+          <td><a href="https://drive.google.com/drive/folders/10eKZZ-SOhAGDAyvJ8HPHCdqzVqLGCRnw?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1Nm6VW01uPoOO7GVr-7Qp2pEFCSqhi-cN/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Estações de Tratamento de Água (ETA)</td>
+          <td><a href="https://drive.google.com/drive/folders/1Pg1FVhqmzb2ysWZW-tk_z9cuW5dpacoa?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1G4DURZD-g3Cb0Z0k7RcCKSvdKfXOo-IP/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Reservatórios</td>
+          <td><a href="https://drive.google.com/drive/folders/1lcZ0O1KkJAAzz96caAuxV7aesQqbKSjX?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1aPhMhdT48PCREQKS3jIMxVY9X4XHgbRU/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Estação Elevatória de Esgoto (EEE)</td>
+          <td><a href="https://drive.google.com/drive/folders/1n5ARBlI3wVxJj3Qmm6I3EaXw7hkEZMBu?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1ruAkrt5WGf5tYrOHPIfGJEXDmGi3Jmzm/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Estação de Tratamento de Esgoto (ETE)</td>
+          <td><a href="https://drive.google.com/drive/folders/1egszZqMWBp14ZVPl-e0eHlv4568kBf0a?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1-zXaDw4Uv3chL4EniPw_b2I77oOZJW5h/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Bacias de drenagem</td>
+          <td><a href="https://drive.google.com/drive/folders/1IPGwN8TSD2Jw0UMUwW1AMu2jdYjiet82?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1-qgVg537lVpuG4sR1pK6qZndXu-C_gd1/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Lagoas de drenagem</td>
+          <td><a href="https://drive.google.com/drive/folders/1Y7ssf5SUHdTaF99cg55Eunbf4pBqapZf?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/16J_QjtZSb4kR6BzoBjQS5ER0VHSOyoow/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Tubulação de gás</td>
+          <td><a href="https://drive.google.com/drive/folders/1gAdmUhIOeBxXGu54zzzYz6J0tWalh-B7?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1axvWrpkY0xZxQHnkF4rzcw_32ycnp5N5/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Gabarito Embratel</td>
+          <td><a href="https://drive.google.com/drive/folders/1aRRfYhcBna3r5VE3HfOlnld-Yf0E7fNV?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/18Jj7EB4Xd7dnxGVkY66DkdHLbrp2477r/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Mercado público</td>
+          <td><a href="https://drive.google.com/drive/folders/10NCInZ6ccpF5bevH5x8BJL_p0Wk2DAVY?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1ABHGekxzjxxYRUw_44cznoUrRUwYDnR6/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Cemitério</td>
+          <td><a href="https://drive.google.com/drive/folders/1mrJ1TZN9rfG6sfVxo1LtCdrR1tSybeRe?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1oIfRm55W5bK1i78yuT0ComHe-pZNlVq7/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Feiras</td>
+          <td><a href="https://drive.google.com/drive/folders/1GVWqWFlIZ8GMFzg4Y6cVBXKszn4daEIM?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1Wj4JQndBiRSRA8aWHyq51Kc7Hu_xRUKl/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Placas de Endereçamento</td>
+          <td><a href="https://drive.google.com/drive/folders/1G8EQzvtE1ockgfEJtIM5ARag3MI7P-nZ?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1H7bzPXJCpFLtUM91dU-23HcLYdSlj2yI/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Mupis</td>
+          <td><a href="https://drive.google.com/drive/folders/1OSSRFhM6iz3Va3efl29quCh8-fD9D41F?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1WLKgD0jjXU_hqHD61q-Cpsbjo9D3V_FG/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Relógios</td>
+          <td><a href="https://drive.google.com/drive/folders/1gV1e90IdUn_jrJi4Q9htma2A2gu6gZeW?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/11LdwtXLeR-oit6QTO9VuOdFIMtgTYbU0/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Aeroporto</td>
+          <td><a href="https://drive.google.com/drive/folders/1aPoinM08_A6_GFYFzRJvJamtB3jacGXq?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/101yuHLs0hXFkUBw0C0iXOEmXUOJjZA3N/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Macrozoneamento</td>
+          <td><a href="https://drive.google.com/drive/folders/1wA_jg3AifHvVrzi0zUKbNnw0UiS2vQLs?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1YXXD4fWrV6MD_TxrOH3HhoS0UuYYZH3A/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Ca da quadra por bacia</td>
+          <td><a href="https://drive.google.com/drive/folders/1sD6W06hJzibCfuXgXg0uuHukRfHn6cOL?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1T2s6pAKbWHb5A4gqUY_fKz5KcgguQIRT/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Ca da quadra por bairro</td>
+          <td><a href="https://drive.google.com/drive/folders/1QxeeWVKl43prea1_VRt-2JQI35h8HVRi?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1d4fxPGHINQwkYo1nYjwB1BtejoLOyLZq/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>AEIS - Categoria A</td>
+          <td><a href="https://drive.google.com/drive/folders/1u3ewxkjZxcUktM_RZZrhbVTQSLnbSSN9?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1FhMcWBQnc3MV6Hquhqvr-Z53TKu2Vuqw/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>AEIS - Categoria B</td>
+          <td><a href="https://drive.google.com/drive/folders/1u3ewxkjZxcUktM_RZZrhbVTQSLnbSSN9?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1g1tlwwc3gkNVgR2VgaAN06aZ4vxsXHF6/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>AEIS - Categoria C</td>
+          <td><a href="https://drive.google.com/drive/folders/1u3ewxkjZxcUktM_RZZrhbVTQSLnbSSN9?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1DR5bj7wTZPCDqX9F7Aja5OE5PPzpf34k/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>AEIS - Categoria D</td>
+          <td><a href="https://drive.google.com/drive/folders/1u3ewxkjZxcUktM_RZZrhbVTQSLnbSSN9?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1YXUtZ6KtCXj6uWNPVTMdhC-5Lu_T-ojk/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>AEIS - Concentração de vilas</td>
+          <td><a href="https://drive.google.com/drive/folders/1u3ewxkjZxcUktM_RZZrhbVTQSLnbSSN9?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1xvvmboW-QrLwIgARK6DlTYIkTxFtls1Q/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Mancha de Interesse Social (MIS)</td>
+          <td><a href="https://drive.google.com/drive/folders/12zguVfRKB5h45KDP2ZBDAXN2TBW5yubN?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1oGW1q0Hpgel0QoHysRAwPZkevSplyez1/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Área Especial de Operação Urbano (AEOU)</td>
+          <td><a href="https://drive.google.com/drive/folders/1RQ_U_ylNdcNXYTN7f6iNePrVhccdfnNM?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1DaBkFiObBXJ1QO0ecFyTB2LzY6ISnceP/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Área Especial de Preservação Cultural (AEPC)</td>
+          <td><a href="https://drive.google.com/drive/folders/1GIneip2jETsmL7QxvaVUkbAORdr6ipvw?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1f7vi5eU6D0V-dBsSXOD8dEUvL79hHacK/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Área Especial de Interesse Turístico e Paisagístico (AEITP)</td>
+          <td><a href="https://drive.google.com/drive/folders/13n63gZfUn0yJgI4aBNwOvDfW-DqNDfoo?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1Avt0KFXPcBCep1VDQh1JqK04JkCacZ-l/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Patrimônio municipal</td>
+          <td><a href="https://drive.google.com/drive/folders/13cw_Kkv10H6G8WM2IUBq0jBCNcKG1dvZ?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1-IgqvA2_C9wTKzGHn8JM1eiqQBlWxn00/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Patrimônio estadual (polígonos)</td>
+          <td><a href="https://drive.google.com/drive/folders/1lqUvGeS2QEiU0xohwgg4tb8m1BAEWtvu?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/145LDYGMBIEgkTAjqzwvxJq41EZObMId2/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Patrimônio estadual (pontos)</td>
+          <td><a href="https://drive.google.com/drive/folders/1lqUvGeS2QEiU0xohwgg4tb8m1BAEWtvu?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/145LDYGMBIEgkTAjqzwvxJq41EZObMId2/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Patrimônio federal, estadual e ferroviário (polígono)</td>
+          <td><a href="https://drive.google.com/drive/folders/1u6XnlKnIaAnpU-Vlc6yS-GIdX9tBHQz_?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1CIK-9K-x68lQNZfciXRig7ULyvBE0oBp/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Patrimônio federal, estadual e ferroviário (pontos)</td>
+          <td><a href="https://drive.google.com/drive/folders/1u6XnlKnIaAnpU-Vlc6yS-GIdX9tBHQz_?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1wjMVqdiwJmzIlCXSOPS49tfLE2NAZXme/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Patrimônio federal, municipal e ferroviário (polígonos)</td>
+          <td><a href="https://drive.google.com/drive/folders/1CymlPnpjyED8c4Ft2H7K26Gg19j3O2AD?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1wWT2OyeQgvXe5lAoHLzXu30PV2f7ySBI/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Patrimônio federal, municipal e ferroviário (pontos)</td>
+          <td><a href="https://drive.google.com/drive/folders/1CymlPnpjyED8c4Ft2H7K26Gg19j3O2AD?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1FxIFa7yq85Spn0zlTwknW755aje_ZVPw/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Contaminação de água</td>
+          <td><a href="https://drive.google.com/drive/folders/13-vfjAE9G7ImV8S4cw2vWSSsCNaPiOoJ?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1v7CsFlXMRnwOYJdHO28ISqfXMSUT3Qsi/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Contaminação de água e solo (polígonos)</td>
+          <td><a href="https://drive.google.com/drive/folders/13-vfjAE9G7ImV8S4cw2vWSSsCNaPiOoJ?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1RxDuQ8hPhBFZBqsjKa6mYsnyLqFKv5ua/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Contaminação de água e solo (pontos)</td>
+          <td><a href="https://drive.google.com/drive/folders/13-vfjAE9G7ImV8S4cw2vWSSsCNaPiOoJ?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1ZVtXb516I2lTQ94Fa6xx6DXIfs3l1gls/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Área Especial de Risco de Erosão (AEPR)</td>
+          <td><a href="https://drive.google.com/drive/folders/1alegZgVsY9m67vXujGN344vRDyK69Kmo?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1hhais8-brI6_rGtadb7NSb7wNxTBn06H/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Erosão costeira</td>
+          <td><a href="https://drive.google.com/drive/folders/1RZaPejF3TDOzAiAXuD6Iu-QI3tT4OmjT?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1OvdL5ytqnR5SSLUlBVTrSrVXjrYbsfG6/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Praias prioritárias</td>
+          <td><a href="https://drive.google.com/drive/folders/1RZaPejF3TDOzAiAXuD6Iu-QI3tT4OmjT?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1o0CqNJHhxlC7z8ql3hZPCzoaWKAXW3Tt/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Rodovias</td>
+          <td><a href="https://drive.google.com/drive/folders/1CDEVCskTn0BZCHmTlhhSHVD9DaUkaHTW?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1TnKBW1ekRUqLnDKqjdJQ96IsuHLNWA4X/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Redes de alta tensão</td>
+          <td><a href="https://drive.google.com/drive/folders/16QY4muAFCpmpdROM_loHQGpdc4fpnr2R?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1w72p_KSjVIrc4QJMt5AsNu1Rn2MuxwYQ/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Limite do mar</td>
+          <td><a href="https://drive.google.com/drive/folders/1DxzVaZXB-Ri9wibJpj9UvWSCXeco_kIe?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1Nqzyg-3vVvFAWQlXrfL546WJs-5yqQ37/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Orla fluvial</td>
+          <td><a href="https://drive.google.com/drive/folders/1DxzVaZXB-Ri9wibJpj9UvWSCXeco_kIe?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1_Qk2WtmoYN_cs8qYZp2byi4VBO8AS4MW/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Orla marítima</td>
+          <td><a href="https://drive.google.com/drive/folders/1DxzVaZXB-Ri9wibJpj9UvWSCXeco_kIe?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/138Q5tQc2e30jhN4qpiMJpbUUjNlkrb2X/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Rio Potengi</td>
+          <td><a href="https://drive.google.com/drive/folders/1DxzVaZXB-Ri9wibJpj9UvWSCXeco_kIe?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1gsuuECUbaMVBV3c2BbZt_yWBak-_-Brq/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Área de pesca</td>
+          <td><a href="https://drive.google.com/drive/folders/1ZGjWMZHP2K1O-CGDk7NAmBW5C2puFSCi?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/11fL984gNO25kvuGa0B4OZxsNMg40ZcJb/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Eixos Estruturantes</td>
+          <td><a href="https://drive.google.com/drive/folders/12cv2yJWUTBahPoPRnFelkKWvisJMKk_y?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1cbN51eNUgUMH0Q4Sm-JPs9BVCjqECsj9/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Área Especial de Requalificação Urbana (AERU)</td>
+          <td><a href="https://drive.google.com/drive/folders/1eA9kwxrBEXd0mCj3MBwc0kA_v7FyaBor?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1g5PmjCli03kc9Rfw5YpbSmG-UCYgnzwU/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Área Especial Militar (AEM)</td>
+          <td><a href="https://drive.google.com/drive/folders/18Ah3a9mx9UtJ4Hzvv75zy-AAHvjKFFcM?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1pW-diSC-PhQQU8mZYNpWg0OTHr6wCXH3/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Área Especial Portuária (AEP)</td>
+          <td><a href="https://drive.google.com/drive/folders/1nDb4FaNiEi6SI6-1AEA7qowLAsJ9qCiQ?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1SLOobEwDD3j5U8EXV07pMj7DGRaUf5X3/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Área ocorrência de espécies ameaçadas</td>
+          <td><a href="https://drive.google.com/drive/folders/1ZGjWMZHP2K1O-CGDk7NAmBW5C2puFSCi?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1sYz_D3B_RsSIblW6YaynI1W-6dZyJFhq/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Zona de Proteção Ambiental 01</td>
+          <td><a href="https://drive.google.com/drive/folders/1rHEOiFLgX0sP8n1ixfORcFVm85JXbUjV?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1z63qjcghmHj-UWh6z7uL7yeYhpMGlp07/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Zona de Proteção Ambiental 02</td>
+          <td><a href="https://drive.google.com/drive/folders/17uKvc2YEBdODZoZfWjrZVEK_-O5q3ivT?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1KFPwTjbu--rmx7Io_ws6ur2dZxcCZDcE/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Zona de Proteção Ambiental 03</td>
+          <td><a href="https://drive.google.com/drive/folders/1k0HaAN9aGkGGA8p3Wz8KzvBu5WH22l0K?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1hlLTFr2G2dCDfhbb7c7ySn2DUbWZ6lfW/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Zona de Proteção Ambiental 04</td>
+          <td><a href="https://drive.google.com/drive/folders/1JaCGvQkSPtZc_PjGLz_ur3z7g2K4rpZd?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1_Dw-CpV5jx-lhoaAK7kyE5uq7nsgnGrm/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Zona de Proteção Ambiental 05</td>
+          <td><a href="https://drive.google.com/drive/folders/1PHQrpaRZlQ9iJZt6_Q-F5VqJBHxT7IUb?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1r3rKmeWxNn83TkSQ5fGovjzOrLkeb8J4/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Zona de Proteção Ambiental 06</td>
+          <td><a href="https://drive.google.com/drive/folders/18kRt87bUwXR4S6rIopWnJyPfQQ4pfMMz?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1NBqwmq7spRyd4UhKRIQ_RHibCJrJ_u6Y/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Zona de Proteção Ambiental 07</td>
+          <td><a href="https://drive.google.com/drive/folders/1N6nWRA4ZOiTs9vSfKh5gsJH9XfIZWUDl?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1cpB61OdtSu4aR9c8LBDDWcGM4MNfSdN8/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Zona de Proteção Ambiental 08</td>
+          <td><a href="https://drive.google.com/drive/folders/1E-vPB45Lz4mFhCAOqz5nhK5h9-R9gL_i?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1IDga86w1KQw-6oNuwopxqJZKJZg_2m-8/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Zona de Proteção Ambiental 09</td>
+          <td><a href="https://drive.google.com/drive/folders/1JnicZD4_-_FSFI1RZsyXX7HJ65hEtscT?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1C5Inek_ISWcsPoyv3HqLmtnvUJT_EqQi/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Zona de Proteção Ambiental 10</td>
+          <td><a href="https://drive.google.com/drive/folders/1pVGHT8FY0SKm39Q91ehpLeFQTqQRE4nY?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1S4XKf402aJHyJtFb7dOVbDbeAbzAReY4/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Rios e Margens Fluviais</td>
+          <td><a href="https://drive.google.com/drive/folders/1dSmOJ92KL5cBSIf5k6pzwqVDtJo_X5ed?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1K8Iy9ZRr-HP9h-Gdzunaa2qhqrI3RgMe/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Lagoas e áreas no entorno</td>
+          <td><a href="https://drive.google.com/drive/folders/1icAZnvq3vTTr-IPmdrrMZPTiXxoSLwUL?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1x4-GdLRHP-xy33mSwqcj_RCcTPjZJn9K/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Nascentes e olhos d'água</td>
+          <td><a href="https://drive.google.com/drive/folders/1oIQIVPRiQuTU_iGvb_wTmMHRCtDXvIqn?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1jk--Hz7G06qUS4OiBxwTFZBTgYOz0x2W/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Áreas no entorno de nascentes e olhos d'água</td>
+          <td><a href="https://drive.google.com/drive/folders/1oIQIVPRiQuTU_iGvb_wTmMHRCtDXvIqn?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1RL06rGpcj8jeOEmdOu1ZhfC0Yo8uODh3/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Brejos e áreas no entorno</td>
+          <td><a href="https://drive.google.com/drive/folders/1dNlcZmmzdCz29mmI1WqMzflMg4XCVttv?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1bDZ5NP1Hix379zurzvbF6uNWuA9LvH-9/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Encostas</td>
+          <td><a href="https://drive.google.com/drive/folders/1YUf7A_HamyGvp2BJvl0kx2L3MH2GlUfB?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1YGJOX3tuaU2kAFmKAMSeQzP1Nwx1rHVR/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Manguezais</td>
+          <td><a href="https://drive.google.com/drive/folders/1TqcfnbnUewxEHC7BWnU9UC4Jbq6euO7G?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/14weVWEWYrSTdEGRynurxCAwG6q1RIrQU/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Falésias e Bordas de Tabuleiro</td>
+          <td><a href="https://drive.google.com/drive/folders/1yaS3c4QUJcpvzJKMfUF7RcVTJLwRuOML?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1qSfOxEDe_hUIIg4sKkghs1oGJ-C8tzO7/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Dunas</td>
+          <td><a href="https://drive.google.com/drive/folders/1Wz38T_Z1FZaSfloYMvbwhPyORa4tobm0?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1ERznFG7HYMryqdwJfMEpb3rO-i_rl4Zp/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Recifes</td>
+          <td><a href="https://drive.google.com/drive/folders/1Tpu1YkjfjToDXBzpVxv9p1h8K-RDGfEx?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1bq8vR5PomDnKTF3FqwMs1c-nXknixlVq/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Vegetação dunar</td>
+          <td><a href="https://drive.google.com/drive/folders/16AD_Z9leTCQzJslwoT1M19XDyoIa-k31?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1UDckCuzvtL6cl8lTAwLCBNaGzg2hWv6P/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Áreas com espécies protegidas</td>
+          <td><a href="https://drive.google.com/drive/folders/1H4zmYv8Cs20Iw7Y_pOuNHmt9OC9m4m3q?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1BTh-q6O4EWlb59x7StwSleab2MKg70qE/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>TPC Liberação (CPC)</td>
+          <td><a href="https://drive.google.com/drive/folders/1Ll4YxFdF3u_SYvx4qWCphprXbAbpwnwz?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1rAoNzYnkVnMmsbSYF9rkL6_8_fZxo463/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>TPC Transferência (ATP)</td>
+          <td><a href="https://drive.google.com/drive/folders/1Ll4YxFdF3u_SYvx4qWCphprXbAbpwnwz?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1gwDL_qE1mWCWFnBc7QaBvoRTJBPJ8J2l/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Alvarás - Ampliação e ou Reforma 2017</td>
+          <td><a href="https://drive.google.com/drive/folders/1zEtqW5bk8dWnRdv-5kTducxEi_qs7aYS?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1980jem_Xm9r8X0P3A1L_zX7HRacFswOo/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Alvarás - Ampliação e ou Reforma 2018</td>
+          <td><a href="https://drive.google.com/drive/folders/1CDP7ouUjAy2w7T2MDaY_fGMBDe7w1FBK?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1I_XR808WK4j4ySTz4nSxC-sXfbRyQ0df/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Alvarás - Ampliação e ou Reforma 2019</td>
+          <td><a href="https://drive.google.com/drive/folders/15eE64O4mcZ1TBJsnrGOI5ety7Xh011hW?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/12N8BY3YXmSMYqEXJdOUYaKkLVKhlXXTa/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Alvarás - Ampliação e ou Reforma 2020</td>
+          <td><a href="https://drive.google.com/drive/folders/17RkoD5ZV0kaOMqNtrdSfDLRp_Gn-Mce1?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1mgCnnsSZaR6KkNv4x3QR80umiQ5O62hl/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Alvarás - Ampliação e ou Reforma 2021</td>
+          <td><a href="https://drive.google.com/drive/folders/1VU5OHAes4lppA_gWsEzwBtFERD6nrtBT?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1p409bFKLhMd7vn8Ybj44XGoNoRCyfJ6C/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Alvarás - Ampliação e ou Reforma 2022</td>
+          <td><a href="https://drive.google.com/drive/folders/1cEotoeCY8N_hBdqCEx-s6QyCZ0Kg1_r6?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1ku-jYw0M_ErVxlMaMXd5l9N38NATNlAN/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Alvarás - Ampliação e ou Reforma 2023</td>
+          <td><a href="https://drive.google.com/drive/folders/1Bq17gGAfGjzvva3PqoRjNplpCLTO6cJm?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1_bawW1QgJSVfgt6eBnwUEN2vOJod9WeY/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Alvarás - Construção 2017</td>
+          <td><a href="https://drive.google.com/drive/folders/1hc_EPxsGzZelZkhyfGNRsLLmUS3IlnIN?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1MXVq0vqNGrOAt8-jXI6kTy7AYOLtHxMI/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Alvarás - Construção 2018</td>
+          <td><a href="https://drive.google.com/drive/folders/1l94Q-1gIkJMOX6ulk7u1qg6LzGp-nZ0Z?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1YIu8fxo65XAUPy_5R52Pr7N3rNR5ptgP/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Alvarás - Construção 2019</td>
+          <td><a href="https://drive.google.com/drive/folders/1_flyqFmTl4UzhNryFUygpca2-4netMz0?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1SId9NgM8UYASyB1ijbnMXByW4MkZzPX5/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Alvarás - Construção 2020</td>
+          <td><a href="https://drive.google.com/drive/folders/1rANOUxFD8msY93sAvpddOyDpd0PwsqYs?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1KXXniteENnlZ1XOphq3CSzgjJnynSlWY/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Alvarás - Construção 2021</td>
+          <td><a href="https://drive.google.com/drive/folders/1RYYKdvGvjKt-XIRNb8M2ESeN3foY9TCh?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/13AmWkb2ExgN_lJSTS40a7-2kFZE2m1JM/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Alvarás - Construção 2022</td>
+          <td><a href="https://drive.google.com/drive/folders/1LOCm74Ru5aV1hMiuTL3RLNthet_cD2Us?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1sYJbYkTRFN-Cg5Y8TxUtJl_sz9eg1Ap7/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Alvarás - Construção 2023</td>
+          <td><a href="https://drive.google.com/drive/folders/1Q7wK8Bv1pYmClU7dTWHI4Ad-sDKKy6IV?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1i_J0odwvFoElAlTUJz-6rrVSNhllfymv/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Alvarás - Demolição 2017</td>
+          <td><a href="https://drive.google.com/drive/folders/1LAb4WkGGXrS6GJSdt9i0ssAn0lBNx60i?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1LqrLciNxfaYXID0q-Vn6oeSNQXdOXBcp/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Alvarás - Demolição 2018</td>
+          <td><a href="https://drive.google.com/drive/folders/1Qbj70XmJHI118w5GVi1IwLoer_LKGMpf?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1Zo-HRyRdbe5G_XoUn2GU2z3kQezhe3kM/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Alvarás - Demolição 2019</td>
+          <td><a href="https://drive.google.com/drive/folders/1U1r1ZgaFgbf19d_uz00HqyjNgEc4kR-_?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1qzX3r3ICIlCMtJzrsTAnXI_vECySGBcq/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Alvarás - Demolição 2020</td>
+          <td><a href="https://drive.google.com/drive/folders/1GW4aneM3UkNs_WQ9jlDnRJ7fCQQXSPKJ?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/12_xEM35TiqAa5SMwHIW-gOeelvGGEycI/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Alvarás - Demolição 2021</td>
+          <td><a href="https://drive.google.com/drive/folders/17m201K3CB70NZaxazNaCOK14pz0lU5kj?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1PjPeZ-N47MwiVa-vZGcCWDwUr-xRnmMm/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Alvarás - Demolição 2022</td>
+          <td><a href="https://drive.google.com/drive/folders/1LW4vfwgkrhQtNSfm2Hgc1Q3_8JJopm5_?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1l63t7OMMIghX4RdwgWjWmDVvkHFu6W6d/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Alvarás - Demolição 2023</td>
+          <td><a href="https://drive.google.com/drive/folders/1OGOyfV0fLKX_FSddP14Mw3ai6NXNOTP8?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1ll8efu1Mledk439iUh0iqcSDGS5UILnZ/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Alvarás - Legalização 2017</td>
+          <td><a href="https://drive.google.com/drive/folders/1TKB7kGRyFi75yYRUAxLoKA13cQLetk2g?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1EHpgVjuqgtmxsQEXGYUb4ZlabwrfqxpY/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Alvarás - Legalização 2018</td>
+          <td><a href="https://drive.google.com/drive/folders/1HBjKkbK23d6h0i2_dnqR5bJcpXzSid-0?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1aMg1BDijKxCpJffJFEmBaWGGKVa5zOTa/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Alvarás - Legalização 2019</td>
+          <td><a href="https://drive.google.com/drive/folders/11yoMWe9UMOaZ5hb4YsZHcOvOEhSr6zsE?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1iQBqd46-jitz5dWMG28cdPQs9clg5g8j/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Alvarás - Legalização 2020</td>
+          <td><a href="https://drive.google.com/drive/folders/1W3f4LZcZEgEkJ3hTqiZ0jr4NC2KcPWxU?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1XwkasifibHi0T-JHBA9hc79oiFjtAlho/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Alvarás - Legalização 2021</td>
+          <td><a href="https://drive.google.com/drive/folders/1oMT265r5_zbgM8DfRPR36ViS2bARqtD1?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1jpdG9wQHNHEuYANC_mLsZq7VCfn5AaJ0/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Alvarás - Legalização 2022</td>
+          <td><a href="https://drive.google.com/drive/folders/1SG_K32NZyDwua8tDTJs0MLbOO6qGURTV?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1FAtF0uym7Fi3HlRbI-JTeF8cqwPZ85wv/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Alvarás - Legalização 2023</td>
+          <td><a href="https://drive.google.com/drive/folders/1QciKx0s9mcvxepW-iG53fRiCk667-hqi?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1eEPsnwST1Y0-ngVJ48EghZ-8mddO4Afq/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Alvarás - Regularização 2017</td>
+          <td><a href="https://drive.google.com/drive/folders/1ZIjChbdK8fmR_ESC7EN6X8xT4Rvjt41q?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1mxLvYfEJVqNcUhN9c8F_SjUktPFukCsY/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Alvarás - Regularização 2018</td>
+          <td><a href="https://drive.google.com/drive/folders/1dwnSIWf2M4P2TP_PMmfs-FXpkCNLdzlL?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1LoxwnTozgyu_Ob3ehlofRUq5OTJ3q-Of/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Alvarás - Regularização 2019</td>
+          <td><a href="https://drive.google.com/drive/folders/12wGjFuvj8AAcMOvs67pX0kKnjvb92-Gq?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/18c1u2AAkarXs3UTOy7tKVoxcHn2AD2jT/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Alvarás - Regularização 2020</td>
+          <td><a href="https://drive.google.com/drive/folders/1jAPZijkV9n-APkkq2eJt_0nudXe82S6z?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1qRz4qUu1GOyPF3dde5lYEQlrBRE_ZpXy/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Alvarás - Regularização 2021</td>
+          <td><a href="https://drive.google.com/drive/folders/1gjmXl4mURzcBgb9i2Hsco934aqizgj0o?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1VqkeUGgl7xc2LHQ-a_TnXaV_xg7j8i6v/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Alvarás - Regularização 2022</td>
+          <td><a href="https://drive.google.com/drive/folders/1rKqPo5mbKnCbAfTMZBeKFRsNaiYH3pPn?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1ZnrQ9PMDatorgx-mbe-vfHJXzF7Wi0Fd/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Alvarás - Regularização 2023</td>
+          <td><a href="https://drive.google.com/drive/folders/1kB9SnnRh3wQNAzGHCDr9aKRPWIfJx14D?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1thEnk_FxbqX5tTGxuVvHSIG0oQEgipkG/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Alvarás - Outros 2017</td>
+          <td><a href="https://drive.google.com/drive/folders/1qjtgEKTy6FaUEnfGtpoRBVW6m2K_oQsw?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="#" target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Alvarás - Outros 2018</td>
+          <td><a href="https://drive.google.com/drive/folders/1wLgK3rvP3Kp2N-RT02QqKTYXpebOgKb9?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="#" target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Alvarás - Outros 2019</td>
+          <td><a href="https://drive.google.com/drive/folders/1FZGuOYQnVWF6ESbRnYiLFj5nBwnMtv3g?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="#" target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Alvarás - Outros 2020</td>
+          <td><a href="https://drive.google.com/drive/folders/1RNchiR34EvF55HViYqMW8fj8QM_t1w85?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="#" target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Alvarás - Outros 2021</td>
+          <td><a href="https://drive.google.com/drive/folders/1oFA-7QIxgsOyWy3FOal24M3FKcoXEoJD?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="#" target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Alvarás - Outros 2022</td>
+          <td><a href="https://drive.google.com/drive/folders/16cBgkQqrHrmlRXKqavxRpcqZ-Ou_h5NZ?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="#" target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Alvarás - Outros 2023</td>
+          <td><a href="https://drive.google.com/drive/folders/1wN02wabaXLNyUNKv3qMH3QCuyeRTuvU5?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="#" target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Habite-se - Misto 2017</td>
+          <td><a href="https://drive.google.com/drive/folders/1eM9qSNpyHFMVnOyu6k6ydyecx2fmM4Kx?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1umszQtS9HTl2p032QCHNIuA1i7PvzUDw/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Habite-se - Misto 2018</td>
+          <td><a href="https://drive.google.com/drive/folders/1rij5cEaMozzxVL2Kt1JGbtIihJLfmcgM?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1sCBpR0CryFV5tU5fikhi9jUSsXZOE0Vc/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Habite-se - Misto 2019</td>
+          <td><a href="https://drive.google.com/drive/folders/14JJGFUd1e6yW9ftGvvKP-PDw3WFN9mDs?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1wg5A8eCiz73DnTSTu30J5rqfdX3D_mPQ/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Habite-se - Misto 2020</td>
+          <td><a href="https://drive.google.com/drive/folders/1g4m8wP9I-y9ZuWdrskx3cjcfVqQwDKSN?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1hPhxq1AYfijC7QHUDR1Y-1k2cm1MiMgS/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Habite-se - Misto 2021</td>
+          <td><a href="https://drive.google.com/drive/folders/17h-q6WTtG7SNuMXbTYTDSdQFiOr5gdiB?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1EL5NM19yOLLkLilBB34TNl_pCIWR_7wP/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Habite-se - Misto 2022</td>
+          <td><a href="https://drive.google.com/drive/folders/16J-1azchGlajZ20TBM8Yh56pt81vdQ5K?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/17g9a1v0FLeE1z68C9fuiooFUBEmUyxAE/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Habite-se - Misto 2023</td>
+          <td><a href="https://drive.google.com/drive/folders/1inQD-SGdZ8COxZ-2Y2_HKN49aOqEZkno?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1c2nmUIgsEfEuuA4ugoVqCZRoa7LmqlZi/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Habite-se - Não Residencial 2017</td>
+          <td><a href="https://drive.google.com/drive/folders/13rwjSt_6S_s913lkhUQURg81H18cqjL4?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1MdYpTe9Hl3KVNvp9aSiu27HtRIvWAJhI/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Habite-se - Não Residencial 2018</td>
+          <td><a href="https://drive.google.com/drive/folders/1m6DMigG_VTGjo-nH-YpA2n_8HDHZQK-c?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1NumKxUJ1B4suUz6riKAevfxAAZFDgcrQ/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Habite-se - Não Residencial 2019</td>
+          <td><a href="https://drive.google.com/drive/folders/1x47Bat9VRev5Wvr309x7ylA2iuT0zRHZ?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1ECRedAWtdHjVZZ_LYr4m4z4Ugf4ig89j/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Habite-se - Não Residencial 2020</td>
+          <td><a href="https://drive.google.com/drive/folders/1lLxCxwNS5yCRMnlH36mw8r12z6HbzGTv?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1liQUYZ0SZLu8vkr0XyevHdK8MA_E1B0Q/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Habite-se - Não Residencial 2021</td>
+          <td><a href="https://drive.google.com/drive/folders/19ug2EyFy2Yd7hd9tPS7T9DodOBhtGwNQ?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1gWZ_oky01jfgOuqKkaPWOo8NSgjoBOLK/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Habite-se - Não Residencial 2022</td>
+          <td><a href="https://drive.google.com/drive/folders/1UkELC7Si9CDqVKtDHzrmd7Zze2FVOOOG?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1JmHiYUm3tQQsKMamwyVpW8XWY2kiXsdN/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Habite-se - Não Residencial 2023</td>
+          <td><a href="https://drive.google.com/drive/folders/11FBnL07G99xDI8e0xqLh8VH2IVeQkvcI?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1vsrENAA7ngDLNiZD_idaUtdjnIvk4LGj/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Habite-se - Multifamiliar 2017</td>
+          <td><a href="https://drive.google.com/drive/folders/1OSaiqKs5cepPXTxNGqeEf4gH1LqInDvh?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1BsKciRagxmpae9dojvz9Uetqe5gKPAL6/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Habite-se - Multifamiliar 2018</td>
+          <td><a href="https://drive.google.com/drive/folders/1EMgO0IyWy20DBydzylL1XhRUQKq-rvUZ?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/18rX8CgbFfhflbiL-zcfRpgANHjYxmqq8/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Habite-se - Multifamiliar 2019</td>
+          <td><a href="https://drive.google.com/drive/folders/1aLGN4sVlCjF4sEN01uXnyRgIrMSkTROM?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1lOuD4SoiIvYJFa_ynXaXXRXA8OldQbis/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Habite-se - Multifamiliar 2020</td>
+          <td><a href="https://drive.google.com/drive/folders/1vltgU7rkxw8_jmSSCF5pAY7gs-87031Z?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1THVX1w0gEYCa73wlZRQ9JKV946xZpKFp/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Habite-se - Multifamiliar 2021</td>
+          <td><a href="https://drive.google.com/drive/folders/1y0xyEmJOTBcJUejh0UP_5xqQ20BYjy_t?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1JLYLqF1WL3rTBGcRyi8YJcbJdQbathCn/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Habite-se - Multifamiliar 2022</td>
+          <td><a href="https://drive.google.com/drive/folders/1aKe5wZc31L9nOui4oY1zQ_-RhnNcdavF?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1TxCkNTC-dP2Hf95QlQMUhXSnCA1g4QZz/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Habite-se - Multifamiliar 2023</td>
+          <td><a href="https://drive.google.com/drive/folders/1E48fwjih4b9niR7mbhZKtY00fgxJCGIT?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1dWGZQ4rxfzXbpSetJ7UUwfEuKU-pmJZ7/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Habite-se - Unifamiliar 2017</td>
+          <td><a href="https://drive.google.com/drive/folders/1JquvVJugeC6ZAgtXAbjak3fSA-6xnPeR?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1TgXA4FV39Ui9n9UK2-NMQ-RhbLSC0nsA/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Habite-se - Unifamiliar 2018</td>
+          <td><a href="https://drive.google.com/drive/folders/1yDozu7gEHywk9xixn95KFUPiSophtkxs?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1GHygy4R6Cgk8SRiYDSWpqjWsvu6aZjeu/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Habite-se - Unifamiliar 2019</td>
+          <td><a href="https://drive.google.com/drive/folders/1Peuk6txGcYgZbGLv129ZFE66mGn6S4Z-?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1-65ce_WRR_vfbZK5qn_M1Qczm_zrIYS2/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Habite-se - Unifamiliar 2020</td>
+          <td><a href="https://drive.google.com/drive/folders/10lsklzvD_pfjW-ryO4j5E6v3Kgr_RMdH?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/10x7k0lcAH0erBKaDmQBdURsjzx61eejK/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Habite-se - Unifamiliar 2021</td>
+          <td><a href="https://drive.google.com/drive/folders/1oVDGTp5Ks611Plh_TCQGh8MCQaF5ws31?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1SBfxCJ9BAVif1k50a9fDQ4rN5-3RVl-f/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Habite-se - Unifamiliar 2022</td>
+          <td><a href="https://drive.google.com/drive/folders/1TksTI9NXZG8NuEMrf4yVYv33Jvt6Jp6g?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1gx7TqOugBgj1reY_BFqT8XhvfKdkjLZB/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+        <tr>
+          <td>Habite-se - Unifamiliar 2023</td>
+          <td><a href="https://drive.google.com/drive/folders/1IY_ihPZN26L4B7g_dQOM5EyNEm02hTTK?usp=sharing"
+              target="_blank"><i class="fa fa-download" aria-hidden="true"></i></a></td>
+          <td><a href="https://drive.google.com/file/d/1HFAvfSiYH9dKDGWL39tvf-wYc6lgaWAC/view?usp=sharing"
+              target="_blank"><img src="img/file-pdf.svg"
+                style="width: 20px; height: auto; filter: brightness(0) invert(1);"></a></td>
+          <td>shapefile</td>
+        </tr>
+      </table> <!-- Fim da estrutura de tabela -->
+    </div> <!-- Fim do sidebar -->
+
+    <div id="mapa"> <!-- Local do mapa -->
+      <div id="map"></div> <!-- Localização do mapa na página -->
+      <script src="main.js"></script> <!-- Puxar códigos javascript -->
+    </div> <!-- Fim do mapa-->
+  </div>
+  <!-- Fim do conteúdo principal do mapa -->
+
+  <!-- Início do Rodapé -->
+  <div class="rodape">
+    <p class="creditos">
+      Secretária Municipal de Meio Ambiente e Urbanismo - SEMURB<br>
+      Secretaria Adjunta de Informação, Planejamento Urbanístico e Ambiental - SAIPUA <br>
+      Departamento de Geoinformação e Pesquisa - DGP<br>
+      Setor de Geoinformação - SGEO
+    </p>
+  </div>
+  <!-- Fim do Rodapé -->
+
+</body>
+
+</html>
